@@ -3,9 +3,11 @@ package az.winter.yuan;
 import android.app.KeyguardManager;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Canvas;
+import android.hardware.display.DisplayManager;
 import android.media.MediaPlayer;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import java.io.IOException;
@@ -36,17 +38,7 @@ public class MyWallpaperService extends WallpaperService {
         private SurfaceHolder surfaceHolder;
         private boolean isLoopVideo = false;
 
-        private BroadcastReceiver screenOffReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-                    // 屏幕关闭，重置视频
-                    resetToInitialVideo();
-                    Log.d("MyWallpaperService", "Screen off, reset video.");
-                    Toast.makeText(MyWallpaperService.this, "Screen off, reset video.", Toast.LENGTH_LONG).show();
-                }
-            }
-        };
+        private DisplayManager.DisplayListener displayListener;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -54,15 +46,42 @@ public class MyWallpaperService extends WallpaperService {
             surfaceHolder = holder;
             setTouchEventsEnabled(true);
 
-            // 注册屏幕关闭的广播接收器
-            IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
-            registerReceiver(screenOffReceiver, filter);
+            // 注册 DisplayManager 的屏幕状态监听器
+            DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
+            displayListener = new DisplayManager.DisplayListener() {
+                @Override
+                public void onDisplayAdded(int displayId) {
+                    // 不需要处理
+                }
+
+                @Override
+                public void onDisplayRemoved(int displayId) {
+                    // 不需要处理
+                }
+
+                @Override
+                public void onDisplayChanged(int displayId) {
+                    Display display = displayManager.getDisplay(displayId);
+                    if (display != null && display.getState() == Display.STATE_OFF) {
+                        // 屏幕关闭时重置视频
+                        resetToInitialVideo();
+                    }
+                }
+            };
+
+            displayManager.registerDisplayListener(displayListener, null);
         }
 
         @Override
         public void onDestroy() {
             super.onDestroy();
-            unregisterReceiver(screenOffReceiver);
+
+            // 注销 DisplayListener
+            DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
+            if (displayManager != null && displayListener != null) {
+                displayManager.unregisterDisplayListener(displayListener);
+            }
+
             releaseMediaPlayer();
         }
 
@@ -155,16 +174,16 @@ public class MyWallpaperService extends WallpaperService {
         @Override
         public void onTouchEvent(MotionEvent event) {
             // 可根据需要处理触摸事件，例如暂停/播放视频
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                if (mediaPlayer != null) {
-                    if (mediaPlayer.isPlaying()) {
-                        mediaPlayer.pause();
-                    } else {
-                        mediaPlayer.start();
-                    }
-                }
-            }
-            super.onTouchEvent(event);
+//            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+//                if (mediaPlayer != null) {
+//                    if (mediaPlayer.isPlaying()) {
+//                        mediaPlayer.pause();
+//                    } else {
+//                        mediaPlayer.start();
+//                    }
+//                }
+//            }
+//            super.onTouchEvent(event);
         }
 
         @Override
