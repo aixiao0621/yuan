@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp">
+
+    <!-- 预览区域（可使用 ImageView 或 VideoView） -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="动态壁纸预览"
+        android:textSize="18sp"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- 设置为壁纸按钮 -->
+    <Button
+        android:id="@+id/btn_set_wallpaper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="设置为壁纸" />
+</LinearLayout>
