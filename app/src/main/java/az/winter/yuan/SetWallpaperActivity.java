@@ -3,14 +3,12 @@ package az.winter.yuan;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-// SetWallpaperActivity.java
 public class SetWallpaperActivity extends AppCompatActivity {
 
     @Override
@@ -25,10 +23,9 @@ public class SetWallpaperActivity extends AppCompatActivity {
     public void setLiveWallpaper() {
         try {
             Intent intent;
-            // Android 8.0 (Oreo) and above
             intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
             intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                        new ComponentName(this, MyWallpaperService.class));
+                        new ComponentName(this, StartWallpaperService.class));
             startActivity(intent);
 //            if (intent.resolveActivity(getPackageManager()) != null) {
 //                startActivity(intent);

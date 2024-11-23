@@ -1,31 +1,16 @@
 package az.winter.yuan;
 
-import android.app.KeyguardManager;
+import android.content.Context;
 import android.content.res.AssetFileDescriptor;
-import android.graphics.Canvas;
 import android.hardware.display.DisplayManager;
 import android.media.MediaPlayer;
 import android.service.wallpaper.WallpaperService;
-import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import java.io.IOException;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.widget.Toast;
 
-public class MyWallpaperService extends WallpaperService {
+public class StartWallpaperService extends WallpaperService {
 
     @Override
     public Engine onCreateEngine() {
@@ -33,11 +18,9 @@ public class MyWallpaperService extends WallpaperService {
     }
 
     private class MyEngine extends Engine implements MediaPlayer.OnCompletionListener {
-
         private MediaPlayer mediaPlayer;
         private SurfaceHolder surfaceHolder;
         private boolean isLoopVideo = false;
-
         private DisplayManager.DisplayListener displayListener;
 
         @Override
@@ -173,7 +156,6 @@ public class MyWallpaperService extends WallpaperService {
 
         @Override
         public void onTouchEvent(MotionEvent event) {
-            // 可根据需要处理触摸事件，例如暂停/播放视频
 //            if (event.getAction() == MotionEvent.ACTION_DOWN) {
 //                if (mediaPlayer != null) {
 //                    if (mediaPlayer.isPlaying()) {
@@ -183,7 +165,7 @@ public class MyWallpaperService extends WallpaperService {
 //                    }
 //                }
 //            }
-//            super.onTouchEvent(event);
+            super.onTouchEvent(event);
         }
 
         @Override

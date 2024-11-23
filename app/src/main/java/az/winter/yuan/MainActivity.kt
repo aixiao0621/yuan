@@ -90,7 +90,7 @@ fun CardContent(page: Int, context: Context) {
                 shape = RoundedCornerShape(16.dp),
                 elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp),
                 onClick = {
-                    setLiveWallpaper(context)
+                    setLiveWallpaper(context, StartWallpaperService::class.java)
                 }
             ) {
                 // 卡片内容
@@ -123,7 +123,7 @@ fun CardContent(page: Int, context: Context) {
                     .fillMaxHeight(0.65f),
                 shape = RoundedCornerShape(16.dp),
                 elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp),
-                onClick = { Toast.makeText(context, "Card 2 Clicked", Toast.LENGTH_SHORT).show() }
+                onClick = { setLiveWallpaper(context, LoopWallpaperService::class.java) }
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -148,17 +148,17 @@ fun CardContent(page: Int, context: Context) {
     }
 }
 
-fun setLiveWallpaper(context: Context) {
+fun setLiveWallpaper(context: Context, className: Class<out android.app.Service>) {
     val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).apply {
         putExtra(
             WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-            ComponentName(context, MyWallpaperService::class.java)
+            ComponentName(context, className)
         )
     }
     try {
         context.startActivity(intent)
     } catch (e: Exception) {
-        Toast.makeText(context, "Failed to set live wallpaper.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Failed to set live wallpaper", Toast.LENGTH_SHORT).show()
         e.printStackTrace()
     }
 }
