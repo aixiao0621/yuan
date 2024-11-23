@@ -5,6 +5,7 @@ import android.content.res.AssetFileDescriptor;
 import android.graphics.Canvas;
 import android.media.MediaPlayer;
 import android.service.wallpaper.WallpaperService;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import java.io.IOException;
@@ -16,7 +17,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.widget.Toast;
 
 public class MyWallpaperService extends WallpaperService {
 
@@ -31,16 +36,33 @@ public class MyWallpaperService extends WallpaperService {
         private SurfaceHolder surfaceHolder;
         private boolean isLoopVideo = false;
 
+        private BroadcastReceiver screenOffReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+                    // 屏幕关闭，重置视频
+                    resetToInitialVideo();
+                    Log.d("MyWallpaperService", "Screen off, reset video.");
+                    Toast.makeText(MyWallpaperService.this, "Screen off, reset video.", Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
             surfaceHolder = holder;
             setTouchEventsEnabled(true);
+
+            // 注册屏幕关闭的广播接收器
+            IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+            registerReceiver(screenOffReceiver, filter);
         }
 
         @Override
         public void onDestroy() {
             super.onDestroy();
+            unregisterReceiver(screenOffReceiver);
             releaseMediaPlayer();
         }
 
@@ -52,13 +74,6 @@ public class MyWallpaperService extends WallpaperService {
                 } else {
                     mediaPlayer.start();
                 }
-
-                // 检查设备是否被锁定
-                KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-                if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
-                    // 设备处于锁定状态，重置为初始视频
-                    resetToInitialVideo();
-                }
             } else {
                 if (mediaPlayer != null) {
                     mediaPlayer.pause();
@@ -69,7 +84,7 @@ public class MyWallpaperService extends WallpaperService {
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
             super.onSurfaceCreated(holder);
-            // Surface 创建时不做操作，在可见性改变时初始化 MediaPlayer
+            // Surface 创建时不做操作，等待可见时初始化 MediaPlayer
         }
 
         @Override
