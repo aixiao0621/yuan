@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import az.winter.yuan.ui.theme.YuanTheme
 import coil.ImageLoader
@@ -91,7 +92,8 @@ fun CardContent(page: Int, context: Context) {
                 elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp),
                 onClick = {
                     setLiveWallpaper(context, StartWallpaperService::class.java)
-                }
+                },
+//                colors = CardDefaults.cardColors(containerColor = Color(0xdddcbe))
             ) {
                 // 卡片内容
                 Box(
@@ -100,7 +102,7 @@ fun CardContent(page: Int, context: Context) {
                 ) {
                     Image(
                         painter = rememberImagePainter(
-                            data = R.raw.mian_a,
+                            data = R.raw.dai,
                             imageLoader = imageLoader,
                             builder = {
                                 crossfade(true)
@@ -110,6 +112,7 @@ fun CardContent(page: Int, context: Context) {
                         modifier = Modifier
                             .fillMaxSize(1.0f)
                             .scale(1.4f)
+//                            .background(Color(0x1E1F22))
                     )
                 }
             }
@@ -131,7 +134,7 @@ fun CardContent(page: Int, context: Context) {
                 ) {
                     Image(
                         painter = rememberImagePainter(
-                            data = R.raw.mian_a,
+                            data = R.raw.ru,
                             imageLoader = imageLoader,
                             builder = {
                                 crossfade(true)

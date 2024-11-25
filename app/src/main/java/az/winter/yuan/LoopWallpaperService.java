@@ -103,7 +103,7 @@ public class LoopWallpaperService extends WallpaperService {
                 mediaPlayer = new MediaPlayer();
                 mediaPlayer.setSurface(surfaceHolder.getSurface());
 
-                int videoResId = R.raw.loop;
+                int videoResId = R.raw.loop_only;
                 AssetFileDescriptor afd = getResources().openRawResourceFd(videoResId);
                 mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
                 afd.close();
