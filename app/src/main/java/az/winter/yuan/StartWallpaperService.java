@@ -48,6 +48,9 @@ public class StartWallpaperService extends WallpaperService {
                     if (display != null && display.getState() == Display.STATE_OFF) {
                         // 屏幕关闭时重置视频
                         resetToInitialVideo();
+                    }else if (display != null && display.getState() == Display.STATE_ON) {
+                        // 屏幕重新打开时恢复视频播放
+                        mediaPlayer.start();
                     }
                 }
             };
@@ -96,22 +99,24 @@ public class StartWallpaperService extends WallpaperService {
         }
 
         private void initMediaPlayer() {
-            try {
-                mediaPlayer = new MediaPlayer();
-                mediaPlayer.setSurface(surfaceHolder.getSurface());
+            if (mediaPlayer == null) {
+                try {
+                    mediaPlayer = new MediaPlayer();
+                    mediaPlayer.setSurface(surfaceHolder.getSurface());
 
-                int videoResId = isLoopVideo ? R.raw.loop : R.raw.main;
-                AssetFileDescriptor afd = getResources().openRawResourceFd(videoResId);
-                mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-                afd.close();
+                    int videoResId = isLoopVideo ? R.raw.loop : R.raw.main;
+                    AssetFileDescriptor afd = getResources().openRawResourceFd(videoResId);
+                    mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                    afd.close();
 
-                mediaPlayer.setLooping(isLoopVideo);
-                mediaPlayer.setOnCompletionListener(this);
+                    mediaPlayer.setLooping(isLoopVideo);
+                    mediaPlayer.setOnCompletionListener(this);
 
-                mediaPlayer.prepareAsync();
-                mediaPlayer.setOnPreparedListener(mp -> mediaPlayer.start());
-            } catch (IOException e) {
-                e.printStackTrace();
+                    mediaPlayer.prepareAsync();
+//                mediaPlayer.setOnPreparedListener(mp -> mediaPlayer.start());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
