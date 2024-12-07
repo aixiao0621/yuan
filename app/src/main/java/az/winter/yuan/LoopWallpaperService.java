@@ -12,14 +12,21 @@ import android.view.SurfaceHolder;
 import java.io.IOException;
 
 public class LoopWallpaperService extends WallpaperService {
+
     @Override
     public Engine onCreateEngine() {
-        return new LoopWallpaperService.LoopEngine();
+        // 从全局配置中获取资源ID
+        int videoResId = WallpaperConfig.INSTANCE.getResId1();  // 或者根据需要获取其他ID
+        return new LoopEngine(videoResId);
     }
     private class LoopEngine extends Engine implements MediaPlayer.OnCompletionListener {
         private MediaPlayer mediaPlayer;
         private SurfaceHolder surfaceHolder;
         private DisplayManager.DisplayListener displayListener;
+        private final int videoResId;
+        public LoopEngine(int videoResId) {
+            this.videoResId = videoResId;
+        }
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
@@ -75,7 +82,7 @@ public class LoopWallpaperService extends WallpaperService {
         public void onVisibilityChanged(boolean visible) {
             if (visible) {
                 if (mediaPlayer == null) {
-                    initMediaPlayer();
+                    initMediaPlayer(videoResId);
                 } else {
                     mediaPlayer.start();
                 }
@@ -98,13 +105,12 @@ public class LoopWallpaperService extends WallpaperService {
             releaseMediaPlayer();
         }
 
-        private void initMediaPlayer() {
+        private void initMediaPlayer(int resId) {
             try {
                 mediaPlayer = new MediaPlayer();
                 mediaPlayer.setSurface(surfaceHolder.getSurface());
 
-                int videoResId = R.raw.loop_only;
-                AssetFileDescriptor afd = getResources().openRawResourceFd(videoResId);
+                AssetFileDescriptor afd = getResources().openRawResourceFd(resId);
                 mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
                 afd.close();
 
@@ -125,6 +131,7 @@ public class LoopWallpaperService extends WallpaperService {
                 mediaPlayer = null;
             }
         }
+
         @Override
         public void onTouchEvent(MotionEvent event) {
 //            if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -138,6 +145,7 @@ public class LoopWallpaperService extends WallpaperService {
 //            }
             super.onTouchEvent(event);
         }
+
         @Override
         public void onCompletion(MediaPlayer mp) {
         }

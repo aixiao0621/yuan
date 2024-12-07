@@ -14,7 +14,9 @@ public class StartWallpaperService extends WallpaperService {
 
     @Override
     public Engine onCreateEngine() {
-        return new MyEngine();
+        int loopResId = WallpaperConfig.INSTANCE.getResId1();
+        int mainResId = WallpaperConfig.INSTANCE.getResId2();
+        return new MyEngine(loopResId, mainResId);
     }
 
     private class MyEngine extends Engine implements MediaPlayer.OnCompletionListener {
@@ -22,7 +24,12 @@ public class StartWallpaperService extends WallpaperService {
         private SurfaceHolder surfaceHolder;
         private boolean isLoopVideo = false;
         private DisplayManager.DisplayListener displayListener;
-
+        private final int loopResId;
+        private final int mainResId;
+        public MyEngine(int loopResId, int mainResId){
+            this.loopResId = loopResId;
+            this.mainResId = mainResId;
+        }
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
@@ -75,7 +82,7 @@ public class StartWallpaperService extends WallpaperService {
         public void onVisibilityChanged(boolean visible) {
             if (visible) {
                 if (mediaPlayer == null) {
-                    initMediaPlayer();
+                    initMediaPlayer(loopResId, mainResId);
                 } else {
                     mediaPlayer.start();
                 }
@@ -98,13 +105,13 @@ public class StartWallpaperService extends WallpaperService {
             releaseMediaPlayer();
         }
 
-        private void initMediaPlayer() {
+        private void initMediaPlayer(int loopResId, int mainResId) {
             if (mediaPlayer == null) {
                 try {
                     mediaPlayer = new MediaPlayer();
                     mediaPlayer.setSurface(surfaceHolder.getSurface());
 
-                    int videoResId = isLoopVideo ? R.raw.loop : R.raw.main;
+                    int videoResId = isLoopVideo ? loopResId : mainResId;
                     AssetFileDescriptor afd = getResources().openRawResourceFd(videoResId);
                     mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
                     afd.close();
@@ -127,7 +134,7 @@ public class StartWallpaperService extends WallpaperService {
                 mediaPlayer = null;
             }
             isLoopVideo = false;
-            initMediaPlayer();
+            initMediaPlayer(loopResId, mainResId);
         }
 
         private void resetToLoopVideo() {
@@ -136,8 +143,7 @@ public class StartWallpaperService extends WallpaperService {
                 mediaPlayer.reset();
 
                 try {
-                    int videoResId = R.raw.loop;
-                    AssetFileDescriptor afd = getResources().openRawResourceFd(videoResId);
+                    AssetFileDescriptor afd = getResources().openRawResourceFd(loopResId);
                     mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
                     afd.close();
 
