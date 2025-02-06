@@ -8,6 +8,7 @@ import android.service.wallpaper.WallpaperService;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
+import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -15,17 +16,21 @@ public class LoopWallpaperService extends WallpaperService {
 
     @Override
     public Engine onCreateEngine() {
-        // 从全局配置中获取资源ID
-        int videoResId = WallpaperConfig.INSTANCE.getResId1();  // 或者根据需要获取其他ID
-        return new LoopEngine(videoResId);
+        // 将 Service 的 Context 传递给 Engine
+        return new LoopEngine(this);
     }
+
     private class LoopEngine extends Engine implements MediaPlayer.OnCompletionListener {
         private MediaPlayer mediaPlayer;
         private SurfaceHolder surfaceHolder;
         private DisplayManager.DisplayListener displayListener;
-        private final int videoResId;
-        public LoopEngine(int videoResId) {
-            this.videoResId = videoResId;
+        private int videoResId;
+        private final Context serviceContext; // 保存 Service 的 Context
+
+        public LoopEngine(Context serviceContext) {
+            this.serviceContext = serviceContext;
+            // 首次创建 Engine 时，先读取一次资源 ID
+            videoResId = WallpaperConfig.INSTANCE.getResId1(serviceContext);
         }
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -81,10 +86,18 @@ public class LoopWallpaperService extends WallpaperService {
         @Override
         public void onVisibilityChanged(boolean visible) {
             if (visible) {
-                if (mediaPlayer == null) {
-                    initMediaPlayer(videoResId);
+                // 重新从 WallpaperConfig 读取最新的资源 ID
+                int newVideoResId = WallpaperConfig.INSTANCE.getResId1(serviceContext);
+                if (newVideoResId != videoResId) { // 如果资源 ID 发生变化
+                    videoResId = newVideoResId; // 更新 videoResId
+                    releaseMediaPlayer(); // 释放旧的 MediaPlayer
+                    initMediaPlayer(videoResId); // 使用新的资源 ID 初始化 MediaPlayer
                 } else {
-                    mediaPlayer.start();
+                    if (mediaPlayer == null) {
+                        initMediaPlayer(videoResId);
+                    } else {
+                        mediaPlayer.start();
+                    }
                 }
             } else {
                 if (mediaPlayer != null) {

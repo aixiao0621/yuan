@@ -186,32 +186,20 @@ fun CardContent(page: Int, context: Context, loopOnly: Boolean) {
 }
 
 fun setLiveWallpaper(context: Context, loopOnly: Boolean, resId1: Int, resId2: Int) {
-    WallpaperConfig.saveResId(context, resId1, resId2);
-    if (loopOnly) {
-        val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).apply {
-            putExtra(
-                WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                ComponentName(context, LoopWallpaperService::class.java)
+    WallpaperConfig.saveResId(context, resId1, resId2)
+    val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).apply {
+        putExtra(
+            WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+            ComponentName(
+                context,
+                if (loopOnly) LoopWallpaperService::class.java else StartWallpaperService::class.java
             )
-        }
-        try {
-            context.startActivity(intent)
-        } catch (e: Exception) {
-            Toast.makeText(context, "Failed to set live wallpaper", Toast.LENGTH_SHORT).show()
-            e.printStackTrace()
-        }
-    } else {
-        val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).apply {
-            putExtra(
-                WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                ComponentName(context, StartWallpaperService::class.java)
-            )
-        }
-        try {
-            context.startActivity(intent)
-        } catch (e: Exception) {
-            Toast.makeText(context, "Failed to set live wallpaper", Toast.LENGTH_SHORT).show()
-            e.printStackTrace()
-        }
+        )
+    }
+    try {
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        Toast.makeText(context, "Failed to set live wallpaper", Toast.LENGTH_SHORT).show()
+        e.printStackTrace()
     }
 }

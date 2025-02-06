@@ -14,9 +14,8 @@ public class StartWallpaperService extends WallpaperService {
 
     @Override
     public Engine onCreateEngine() {
-        int loopResId = WallpaperConfig.INSTANCE.getResId1();
-        int mainResId = WallpaperConfig.INSTANCE.getResId2();
-        return new MyEngine(loopResId, mainResId);
+        // 将 Service 的 Context 传递给 Engine
+        return new MyEngine(this);
     }
 
     private class MyEngine extends Engine implements MediaPlayer.OnCompletionListener {
@@ -24,11 +23,15 @@ public class StartWallpaperService extends WallpaperService {
         private SurfaceHolder surfaceHolder;
         private boolean isLoopVideo = false;
         private DisplayManager.DisplayListener displayListener;
-        private final int loopResId;
-        private final int mainResId;
-        public MyEngine(int loopResId, int mainResId){
-            this.loopResId = loopResId;
-            this.mainResId = mainResId;
+        private int loopResId;
+        private int mainResId;
+        private final Context serviceContext;
+
+        public MyEngine(Context serviceContext){
+            this.serviceContext = serviceContext;
+            // 首次创建 Engine 时，先读取一次资源 ID
+            loopResId = WallpaperConfig.INSTANCE.getResId1(serviceContext);
+            mainResId = WallpaperConfig.INSTANCE.getResId2(serviceContext);
         }
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -81,10 +84,21 @@ public class StartWallpaperService extends WallpaperService {
         @Override
         public void onVisibilityChanged(boolean visible) {
             if (visible) {
-                if (mediaPlayer == null) {
-                    initMediaPlayer(loopResId, mainResId);
+                // 重新从 WallpaperConfig 读取最新的资源 ID
+                int newLoopResId = WallpaperConfig.INSTANCE.getResId1(serviceContext);
+                int newMainResId = WallpaperConfig.INSTANCE.getResId2(serviceContext);
+
+                if (newLoopResId != loopResId || newMainResId != mainResId) { // 如果资源 ID 发生变化
+                    loopResId = newLoopResId; // 更新 loopResId
+                    mainResId = newMainResId; // 更新 mainResId
+                    releaseMediaPlayer(); // 释放旧的 MediaPlayer
+                    initMediaPlayer(loopResId, mainResId); // 使用新的资源 ID 初始化 MediaPlayer
                 } else {
-                    mediaPlayer.start();
+                    if (mediaPlayer == null) {
+                        initMediaPlayer(loopResId, mainResId);
+                    } else {
+                        mediaPlayer.start();
+                    }
                 }
             } else {
                 if (mediaPlayer != null) {
@@ -120,7 +134,7 @@ public class StartWallpaperService extends WallpaperService {
                     mediaPlayer.setOnCompletionListener(this);
 
                     mediaPlayer.prepareAsync();
-//                mediaPlayer.setOnPreparedListener(mp -> mediaPlayer.start());
+//                    mediaPlayer.setOnPreparedListener(mp -> mediaPlayer.start()); // 确保在 prepare 完成后启动
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
